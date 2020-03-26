@@ -1,0 +1,175 @@
+create table city_dim(city_id int,city_name string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table city_dim select incr(),a.city from (select distinct(city) from zomato_analysis) a;
+
+----------------------------------------
+create table country_dim(country_id int,country_code int)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table country_dim select incr(),a.country_code from (select distinct(country_code) from zomato_analysis) a;
+
+---------------------------------------------------------------
+
+
+
+
+create table restaurant_dim(restaurant_name_id int,restaurant_name string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table restaurant_dim select incr(),a.restaurant_name from (select distinct(restaurant_name) from zomato_analysis) a;
+
+------------------------------
+create table locality_dim(locality_id int,locality_name string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+
+insert overwrite table locality_dim select incr(),a.address from (select distinct(address) from zomato_analysis) a;
+
+------------------------------------
+create table cuisine_dim(cuisine_id int,cuisine string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table cuisine_dim select incr(),a.cuisines from (select distinct(cuisines) from zomato_analysis) a;
+
+----------------------------------------
+
+
+
+
+create table rating_star_dim(rating_star_id int,rating_in_5 int)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table rating_star_dim select incr(),a.aggregate_rating from (select distinct(aggregate_rating) from zomato_analysis) a;
+
+
+
+
+
+create table rating_text_dim(rating_text_id int,rating_in_text string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table rating_text_dim select incr(),a.rating_text from (select distinct(rating_text) from zomato_analysis) a;
+
+--------------------------------------
+create table table_booking_dim(table_booking_id int,table_booking_avail string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+
+insert overwrite table table_booking_dim select incr(),a.has_table_booking from (select distinct(has_table_booking) from zomato_analysis) a;
+
+-----------------------------------------------------------------
+create table delivery_facility_dim(delivery_facility_id int,delivery_facility string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table delivery_facility_dim select incr(),a.has_online_delivery from (select distinct(has_online_delivery) from zomato_analysis) a;
+
+
+create table delivery_now_dim(delivery_now_id int,delivery_online_now string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table delivery_now_dim select incr(),a.is_delivering_now from (select distinct(is_delivering_now) from zomato_analysis) a;
+
+
+
+create table delivery_dim(delivery_id int,delivery_facility string,delivery_online_now string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table delivery_dim select incr(),a.has_online_delivery,a.is_delivering_now from (select distinct has_online_delivery,is_delivering_now from zomato_analysis) a;
+
+
+###############################################################################################################
+
+create table fact(city_id int,restaurant_name_id int,locality_id int,cuisine_id int,rating_star_id int,rating_text_id int,table_booking_id int,delivery_id int,average_cost_for_two int,price_range int,votes int,currency string,restaurant_id int,country_id int)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+
+
+
+insert overwrite table fact 
+select a.city_id,b.restaurant_name_id,c.locality_id,d.cuisine_id,e.rating_star_id,p.rating_text_id,f.table_booking_id,g.delivery_id,z.average_cost_for_two,z.price_range,z.votes,z.currency,z.restaurant_id,h.country_id from
+zomato_analysis z inner join city_dim a on (z.city=a.city_name) inner join
+restaurant_dim b on (z.restaurant_name = b.restaurant_name ) inner join
+locality_dim c on (z.address = c.locality_name) inner join
+cuisine_dim d on (z.cuisines = d.cuisine) inner join
+rating_star_dim e on (z.aggregate_rating = e.rating_in_5) inner join
+rating_text_dim p on (z.rating_text=p.rating_in_text) inner join
+table_booking_dim f on (z.has_table_booking = f.table_booking_avail) inner join
+delivery_dim g on (z.has_online_delivery = g.delivery_facility and z.is_delivering_now=g.delivery_online_now) inner join
+country_dim h on (z.country_code=h.country_code);
+
+
+
+
+
+
+
+
+#############################################################################################################################
+---- in mysql 
+create database mini_project;
+
+create table city_dim(city_id int,city_name varchar(500));
+
+sqoop export --connect jdbc:mysql://127.0.0.1/mini_project --username root --password cloudera --table city_dim --export-dir /user/hive/warehouse/mini_project.db/city_dim -m 1;
+
+
+Question 1
+
+select city,count(city) from  
+
+
+
+select locality_id,localiy_name from locality_dim;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+create table delivery_dim(delivery_id int,delivery_facility string,delivery_online_now string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table delivery_dim select incr(),a.has_online_delivery,a.is_delivering_now from (select distinct has_online_delivery,is_delivering_now from zomato_analysis) a;
+
+create table rating_dim(rating_id int,rating_in_5 int,rating_in_text string)
+row format delimited
+fields terminated by ','
+lines terminated by '\n';
+
+insert overwrite table rating_dim select incr(),a.aggregate_rating,a.rating_text from (select distinct aggregate_rating,rating_text from zomato_analysis) a;

@@ -1,0 +1,77 @@
+DROP TABLE keys cascade constraints;
+DROP TABLE users cascade constraints;
+DROP TABLE reviews cascade constraints;
+DROP TABLE reviewDate cascade constraints;
+DROP TABLE product cascade constraints;
+DROP TABLE category cascade constraints;
+DROP TABLE manufacturer cascade constraints;
+DROP TABLE reviewText cascade constraints;
+
+
+
+
+CREATE TABLE keys(
+ k_id varchar2(10) PRIMARY KEY,
+ k_details varchar2(1000));
+ 
+CREATE TABLE manufacturer(
+ m_id varchar2(10) PRIMARY KEY,
+ m_name varchar2(1000));
+
+CREATE TABLE Category(
+ c_id varchar2(25)PRIMARY KEY,
+ c_desc varchar2(20));
+ 
+CREATE TABLE users(
+ u_id varchar2(10) PRIMARY KEY,
+ u_name varchar2(20),
+ u_city varchar2(30),
+ u_province varchar2(30));
+ 
+CREATE TABLE product(
+ p_id varchar2(12) PRIMARY KEY,
+ p_name varchar2(20),
+ p_asins varchar2(30),
+ p_brand varchar2(30));
+ 
+
+CREATE TABLE reviewDate(
+ r_date_id varchar2(10) PRIMARY KEY,
+ r_dateAdded varchar2(30),
+ r_date varchar2(30),
+ r_dateSeen varchar2(30));
+ 
+CREATE TABLE ReviewText(
+ r_id varchar2(10) PRIMARY KEY,
+ r_title varchar2(20),
+ r_text varchar2(30),
+ r_rating Int);
+ 
+CREATE TABLE reviews(
+rs_id varchar2(50) PRIMARY KEY,
+r_didPurchase varchar2(25),
+r_doRecommend varchar2(10),
+r_numHelpful integer,
+r_sourceURLs varchar2(250),
+k_id varchar2(10),
+m_id varchar2(10),
+c_id varchar2(25),
+u_id varchar2(10),
+p_id varchar2(12),
+r_date_id varchar2(10),
+ r_id varchar2(10),
+FOREIGN KEY(u_id) REFERENCES users(u_id),
+FOREIGN KEY(r_id) REFERENCES reviewText(r_id),
+FOREIGN KEY(k_id) REFERENCES keys(k_id),
+FOREIGN KEY(m_id) REFERENCES manufacturer(m_id),
+FOREIGN KEY(c_id) REFERENCES category(c_id),
+FOREIGN KEY (r_date_ID) REFERENCES reviewDate(r_date_ID),
+FOREIGN KEY(p_id) REFERENCES product(p_id));
+
+
+
+commit;
+
+select * from reviews;
+
+create table Acpr( id string, p_name string, p_asins string, p_brand string, p_categories string, p_keys string, manufarturer string, r_date timestamp, r_dateAdded timestamp, r_dateSeen string, r_didPurchase boolean, r_doRecommend boolean, r_id bigint, r_numHelpful int, r_rating int, r_sourceURLs string, r_text string, r_title string, u_city string, u_province string, u_name string);

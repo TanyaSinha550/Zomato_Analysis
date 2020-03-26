@@ -1,0 +1,117 @@
+hdfs dfs -mkdir /mini-project
+hdfs dfs -ls /
+hdfs dfs -put /home/cloudera/ZomatoAnalysis.csv /mini-project/
+hdfs dfs -ls /mini-project
+
+inside Script
+
+#####sudo hive
+create database  if not exists mini_project;
+use mini_project;
+
+
+
+
+##########################
+create external table if not exists validation_zomato_analysis
+(
+Restaurant_id string , 
+Restaurant_name string , 
+Country_code string , 
+City string , 
+Address string , 
+Cuisines string , 
+Average_cost_for_two string , 
+Currency string , 
+Has_table_booking string , 
+Has_online_delivery string , 
+Is_delivering_now string , 
+Price_range string , 
+Aggregate_rating string , 
+Rating_text string , 
+Votes string
+)
+row format delimited
+fields terminated by ',' 
+tblproperties("skip.header.line.count"="1");
+
+
+hadoop fs -put /home/cloudera/mini_project/data/ZomatoAnalysis.csv /user/hive/warehouse/mini_project.db/validation_zomato_analysis/
+
+#############validating
+select "col not valid" as validation from mini_project.validation_zomato_analysis 
+where 
+cast(trim(Restaurant_id) as int) is null
+or trim(Restaurant_name) is null
+or cast(trim(Country_code) as int) is null
+or trim(City) is null
+or trim(Address) is null
+or trim(Cuisines) is null or trim(Cuisines)=""
+or cast(trim(Average_cost_for_two)  as int) is null
+or trim(Currency) is null
+or trim(Has_table_booking) is null
+or trim(Has_online_delivery) is null
+or trim(Is_delivering_now) is null
+or cast(trim(Price_range)  as int) is null
+or cast(trim(Aggregate_rating)  as double) is null
+or trim(Rating_text) is null
+or cast(trim(votes)  as int) is null
+;
+
+
+hive -S -f /home/cloudera/miniproject/script/validation_analysis.hql > /home/cloudera/miniproject/logs/errlog.log
+
+use mini_project;
+
+
+create external table if not exists zomato_analysis
+(
+Restaurant_id int ,  +
+Restaurant_name string , +
+Country_code int ,   +
+City string ,        +
+Address string ,     +
+Cuisines string ,    +
+Average_cost_for_two int , 
+Currency string , 
+Has_table_booking string , +
+Has_online_delivery string , + 
+Is_delivering_now string , +
+Price_range int ,       
+Aggregate_rating double , +
+Rating_text string ,  +
+Votes int
+)
+row format delimited
+fields terminated by ',' ;
+
+
+
+
+insert into zomato_analysis
+select 
+case when cast(trim(Restaurant_id) as int) is null then 0000 else cast(trim(Restaurant_id) as int) end as Restaurant_id,
+case when trim(Restaurant_name) is null or trim(Restaurant_name)=""  then "NA" else trim(Restaurant_name) end as Restaurant_name,
+case when cast(trim(Country_code) as int) is null then 0000 else cast(trim(Country_code) as int) end as Country_code,
+case when trim(City) is null or trim(City)=""  then "NA" else trim(City) end as City,
+case when trim(Address) is null or trim(Address)=""  then "NA" else trim(Address) end as Address,
+case when trim(Cuisines) is null or trim(Cuisines)=""  then "NA" else trim(Cuisines) end as Cuisines,
+case when cast(trim(Average_cost_for_two) as int) is null then 0000 else cast(trim(Average_cost_for_two) as int) end as Average_cost_for_two,
+case when trim(Currency) is null or trim(Currency)=""  then "NA" else trim(Currency) end as Currency,
+case when trim(Has_table_booking) is null or trim(Has_table_booking)=""  then "NA" else trim(Has_table_booking) end as Has_table_booking,
+case when trim(Has_online_delivery) is null or trim(Has_online_delivery)=""  then "NA" else trim(Has_online_delivery) end as Has_online_delivery,
+case when trim(Is_delivering_now) is null or trim(Is_delivering_now)=""  then "NA" else trim(Is_delivering_now) end as Is_delivering_now,
+case when cast(trim(Price_range) as int) is null then 0000 else cast(trim(Price_range) as int) end as Price_range,
+case when cast(trim(Aggregate_rating) as double) is null then 0 else Aggregate_rating  end as Aggregate_rating ,
+case when trim(Rating_text) is null or trim(Rating_text)=""  then "NA" else trim(Rating_text) end as Rating_text,
+case when cast(trim(votes) as int) is null then 0000 else cast(trim(votes) as int) end as votes
+from mini_project.validation_zomato_analysis;
+
+select cuisines from zomato_analysis where cuisines="NA";
+
+
+
+
+
+
+

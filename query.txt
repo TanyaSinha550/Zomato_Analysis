@@ -1,0 +1,49 @@
+select b.city_name,count(b.city_name) as cb from fact a,city_dim b where a.city_id=b.city_id group by b.city_name order by cb desc limit 10;
+
+select b.restaurant_name,avg(a.average_cost_for_two) as ag from fact a,restaurant_dim b where a.restaurant_name_id=b.restaurant_name_id 
+group by b.restaurant_name order by ag desc limit 10;
+
+select b.restaurant_name,avg(a.price_range) as ag from fact a,restaurant_dim b where a.restaurant_name_id=b.restaurant_name_id 
+group by b.restaurant_name order by ag desc limit 10;
+
+select b.restaurant_name,avg(a.votes) as ag from fact a,restaurant_dim b where a.restaurant_name_id=b.restaurant_name_id 
+group by b.restaurant_name order by ag desc limit 10;
+
+
+select distinct(b.restaurant_name),c.delivery_facility,c.delivery_online_now,d.rating_in_5 from fact a,restaurant_dim b,delivery_dim c,rating_star_dim d
+where a.restaurant_name_id=b.restaurant_name_id and a.delivery_id=c.delivery_id and a.rating_star_id=d.rating_star_id and c.delivery_facility='Yes'
+and c.delivery_online_now='Yes'  order by d.rating_in_5 desc limit 3;
+
+------------------------------------------------
+
+select b.restaurant_name,c.city_name,d.rating_in_5 from fact a ,restaurant_dim b,city_dim c,rating_star_dim d
+where a.restaurant_name_id=b.restaurant_name_id and a.city_id=c.city_id and a.rating_star_id=d.rating_star_id 
+and d.rating_in_5=(select max(rating_in_5) from rating_star_dim group by rating_in_5)
+group by c.city_name;
+
+select b.restaurant_name,c.city_name,d.rating_in_5 from fact a ,restaurant_dim b,city_dim c,rating_star_dim d
+where a.restaurant_name_id=b.restaurant_name_id and a.city_id=c.city_id and a.rating_star_id=d.rating_star_id 
+group by c.city_name,d.rating_in_5 having d.rating_in_5 >4;
+
+---------------------------------------------
+
+select b.city_name,count(c.restaurant_name) from fact a, city_dim b, restaurant_dim c
+
+
+
+------------------------
+***select b.locality_name,count(b.locality_name),c.city_name,d.rating_in_5 from fact a,locality_dim b,city_dim c,rating_star_dim d 
+where a.locality_id=b.locality_id and a.city_id=c.city_id and a.rating_star_id=d.rating_star_id  and (c.city_name='New Delhi' or c.city_name='Gurgaon' or c.city_name='Noida') and d.rating_in_5>3.3
+group by b.locality_name,c.city_name,d.rating_in_5 order by d.rating_in_5 desc limit 10 ;
+
+
+***select b.locality_name,count(b.locality_name) as cb,c.city_name,d.rating_in_5 from fact a,locality_dim b,city_dim c,rating_star_dim d 
+where a.locality_id=b.locality_id and a.city_id=c.city_id and a.rating_star_id=d.rating_star_id  and (c.city_name='New Delhi' or c.city_name='Gurgaon' or c.city_name='Noida') and d.rating_in_5>3.3
+group by b.locality_name,c.city_name,d.rating_in_5 order by cb desc limit 10 ;
+
+
+
+
+select b.locality_name,c.city_name,count(b.locality_name) as cb from fact a,locality_dim b,city_dim c,rating_star_dim d 
+where a.locality_id=b.locality_id and a.city_id=c.city_id and a.rating_star_id=d.rating_star_id  and (c.city_name='New Delhi' or c.city_name='Gurgaon' or c.city_name='Noida') and d.rating_in_5>3.3
+group by b.locality_name,c.city_name,d.rating_in_5 order by cb desc limit 10 ;

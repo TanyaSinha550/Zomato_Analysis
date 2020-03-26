@@ -1,0 +1,26 @@
+hadoop fs -rm /user/hive/warehouse/mini_project.db/validation_zomato_analysis/*
+hadoop fs -rm /user/hive/warehouse/mini_project.db/zomato_analysis/*
+#crate table de
+hive -f /home/cloudera/miniproject/script/create_hive_table_validation.hql
+if [ $? -eq 0 ]; then
+	echo "create table job executed"
+else 
+	echo " create table job failed"
+	exit 1;
+fi
+hadoop fs -put /home/cloudera/miniproject/data/demographics.csv /user/hive/warehouse/mini_project.db/validation_demographics/
+
+#validation
+
+hive -S -f /home/cloudera/miniproject/script/datatype_and_null_validation_demographics.hql > /home/cloudera/miniproject/logs/errlog.log
+head -n -2 /home/cloudera/miniproject/logs/errlog.log > /home/cloudera/miniproject/logs/final_errlog.log
+cnt=`cat /home/cloudera/miniproject/logs/final_errlog.log | wc -l`
+echo $cnt
+if [ $cnt -eq 0 ] ;then
+echo "file is good"
+else 
+echo "file has errors so correcting file"
+fi
+hive -S -f /home/cloudera/miniproject/script/data_correction_demographics.hql
+
+echo "data is corrected"
